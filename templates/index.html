@@ -1,0 +1,60 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flask LLM Interface</title>
+  <!-- Base styles -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Editor-specific styles -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/editor.css') }}">
+
+  <!-- DOMPurify for sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+  <!-- marked for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* Viewer styling */
+    #viewer { border: 1px solid #ccc; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; }
+    #format-select { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>LLM Interface</h1>
+  <form id="mainForm" method="post" onsubmit="updateViewerContent()">
+    <label>System Prompt:<br>
+      <textarea class="main-container" name="system_prompt" rows="10" cols="60">{{ system_prompt or '' }}</textarea>
+    </label><br><br>
+
+    <label>User Request:<br>
+      <textarea class="main-container" name="user_request" rows="10" cols="60">{{ user_request or '' }}</textarea>
+    </label><br><br>
+
+    <!-- hidden field to receive sanitized HTML -->
+    <input type="hidden" name="html_content" id="html_content">
+
+    <button type="submit" name="action" value="go">GO</button><br><br>
+
+    <!-- Format selector and viewer div -->
+    <label for="format-select">View as:</label>
+    <select id="format-select">
+      <option value="markdown">Markdown</option>
+      <option value="html">HTML</option>
+    </select>
+    <div id="viewer"></div>
+  </form>
+
+  <!-- Untrusted content from server -->
+  <script>
+    var deanonimizedContent = `{{ llm_response|safe }}`;
+
+    // When the form submits, copy what's currently rendered into #viewer
+    function updateViewerContent() {
+      document.getElementById('html_content').value = document.getElementById('viewer').innerHTML;
+    }
+  </script>
+  <!-- Viewer logic -->
+  <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+</body>
+</html>

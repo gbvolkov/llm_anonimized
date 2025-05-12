@@ -1,0 +1,12 @@
+python-dotenv
+
+langchain 
+langchain_mistralai
+langchain_openai
+langchain_community
+grpcio
+yandexcloud
+
+Flask>=2.0.0
+
+palimpsest@git+https://github.com/gbvolkov/PalimpsestLib.git
