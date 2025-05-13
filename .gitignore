@@ -2,5 +2,5 @@ __pycache__
 .venv
 data
 logs
-
+nohup.out
 gv.env

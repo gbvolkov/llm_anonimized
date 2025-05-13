@@ -18,6 +18,7 @@ def create_app():
 
 
 if __name__ == '__main__':
-    setup_logging("anonimizer_web")
+    import logging
+    setup_logging("anonimizer_web", project_console_level=logging.DEBUG, other_console_level=logging.DEBUG)
     app = create_app()
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=False)
