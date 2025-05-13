@@ -50,11 +50,14 @@ def generate_answer(system_prompt: str, user_request: str) -> Tuple[str, str]:
         ]
     )
     processor.reset_context()
-    chain = {"user_request": lambda txt: anonymize(txt, language="en")} | prompt | llm | (lambda ai_message: deanonymize(ai_message.content))
-    response = chain.invoke(user_request)
+    anonimized_request = anonymize(user_request, language="en")
 
-    llm_resp = response
-    return llm_resp
+    chain = prompt | llm
+    #chain = {"user_request": lambda txt: anonymize(txt, language="en")} | prompt | llm | (lambda ai_message: deanonymize(ai_message.content))
+    response = chain.invoke(anonimized_request)
+    llm_answer = response.content
+    deanonymized_answer = deanonymize(llm_answer)
+    return deanonymized_answer, anonimized_request, llm_answer
 
 if __name__ == "__main__":
     from palimpsest.logger_factory import setup_logging

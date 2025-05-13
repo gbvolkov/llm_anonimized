@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LLM Answer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Generated Answer</h1>
+        <!-- Hidden raw markdown for client-side parsing -->
+        <textarea id="raw-content" style="display:none;">{{ llm_response }}</textarea>
+        <!-- Scrollable answer area -->
+        <div id="answer-content"></div>
+        <!-- Back button pinned at bottom -->
+        <a href="{{ url_for('main_bp.index', user_request=user_request) }}" class="btn">Back</a>
+    </div>
+
+    <!-- right‐edge slider panel with its own toggle handle -->
+    <div id="detail-slider" class="detail-slider">
+        <!-- floating handle -->
+        <button id="toggle-slider" class="toggle-btn">&laquo;</button>
+
+        <div class="slider-header">
+        <div class="tabs">
+            <button data-tab="anonymized" class="tab-btn active">Anonymized Request</button>
+            <button data-tab="llm" class="tab-btn">LLM Answer</button>
+        </div>
+        <button id="close-slider" class="close-btn">&times;</button>
+        </div>
+        <div class="slider-body">
+        <pre id="pane-anonymized" class="pane active">{{ anonymized_request }}</pre>
+        <pre id="pane-llm" class="pane">{{ llm_answer }}</pre>
+        </div>
+    </div>
+
+    <!-- Markdown parser and sanitizer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <!-- include slider script -->
+    <script src="{{ url_for('static', filename='js/slider.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const raw = document.getElementById('raw-content').value;
+            document.getElementById('answer-content').innerHTML =
+                DOMPurify.sanitize(marked.parse(raw));
+        });
+    </script>
+</body>
+
+</html>
