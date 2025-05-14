@@ -5,3 +5,15 @@ function toggleResponses() {
     llmDiv.hidden = (view !== 'llm');
     deanDiv.hidden = (view !== 'dean');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const link = document.getElementById('config-link');
+  if (!link) return;
+
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const model = document.getElementById('model').value;
+    const baseUrl = link.getAttribute('data-config-url');
+    window.location.href = baseUrl + '?model=' + encodeURIComponent(model);
+  });
+});

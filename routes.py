@@ -3,11 +3,13 @@ import json
 
 from llm import generate_answer, get_llm_parameters
 
-
 main_bp = Blueprint('main_bp', __name__)
 
-defaults_map = get_llm_parameters('')
-available_models = list(defaults_map.keys())
+def get_available_models():
+    defaults_map = get_llm_parameters('')
+    return list(defaults_map.keys())
+
+available_models = get_available_models()
 
 @main_bp.before_app_request
 def load_llm_params():
@@ -21,18 +23,18 @@ def load_llm_params():
         else:
             session['llm_params'] = {}
 
-
 @main_bp.route('/', methods=['GET'])
 def index():
     # Read system_prompt from cookie or use default
     default_prompt = request.cookies.get('system_prompt', 'Ты полезный помощник.')
     # Read user_request from query string on return or default greeting
     default_request = request.args.get('user_request', 'Привет!')
-    # restore last-used model or default to OpenAI
+    # Restore last-used model or default to OpenAI
     selected_model = request.args.get('model') or request.cookies.get('model', 'OpenAI')
 
-    # Load saved LLM parameters from cookie, if any
-    llm_params = session.get('llm_params', {})
+    # Load saved LLM parameters for the selected model only
+    all_params = session.get('llm_params', {})
+    llm_params = all_params.get(selected_model, {})
 
     return render_template('index.html', 
                            system_prompt=default_prompt, 
@@ -44,7 +46,6 @@ def index():
 @main_bp.route('/config', methods=['GET', 'POST'])
 def config():
     # Determine model to configure, falling back to cookie
-    #available_models = current_app.config['AVAILABLE_MODELS']
     model = request.values.get('model') or request.cookies.get('model', available_models[0])
 
     if request.method == 'POST':
@@ -65,19 +66,23 @@ def config():
                 value = raw
             params[name] = value
 
-        # Update session and persist cookie once
-        session['llm_params'] = params
+        # Merge this model's overrides into the session map
+        all_params = session.get('llm_params', {})
+        all_params[model] = params
+        session['llm_params'] = all_params
+
+        # Persist updated map in cookie
         resp = make_response(redirect(url_for('main_bp.index')))
         resp.set_cookie('model', model)
-        resp.set_cookie('llm_params', json.dumps(params), max_age=30*24*3600)
+        resp.set_cookie('llm_params', json.dumps(all_params), max_age=30*24*3600)
         return resp
 
     # GET: render form with defaults and current session params
     parameters = get_llm_parameters(model)
-    current = session.get('llm_params', {})
+    all_params = session.get('llm_params', {})
     return render_template(
         'config.html', model=model,
-        parameters=parameters, llm_params=current
+        parameters=parameters, llm_params=all_params
     )
 
 @main_bp.route('/result', methods=['POST'])
@@ -87,13 +92,16 @@ def result():
     user_request = request.form.get('user_request', '')
     model = request.form.get('model', 'OpenAI')
     
-    llm_params = session.get('llm_params', {})
+    # Load saved parameters for this model
+    all_params = session.get('llm_params', {})
+    llm_params = all_params.get(model, {})
 
-    answer, anonymized_request, llm_answer = generate_answer(system_prompt=system_prompt, 
-                                                             user_request=user_request, 
-                                                             llm_provider=model,
-                                                             llm_parameters=llm_params)
-
+    answer, anonymized_request, llm_answer = generate_answer(
+        system_prompt=system_prompt, 
+        user_request=user_request, 
+        llm_provider=model,
+        llm_parameters=llm_params
+    )
 
     response = make_response(render_template(
         'result.html',

@@ -23,17 +23,17 @@
             <input type="hidden" name="{{ name }}" value="{{ value }}">
           {% endfor %}
           <!-- Model Selection -->
-          <!--div class="form-group">
+          <div class="form-group">
             <label for="model">Choose Model</label>
             <div class="flex items-center space-x-2">
               <select name="model" id="model" class="form-control flex-1">
                 {% for m in available_models %}
-                  <option value="{{ m }}" {% if m==selected_model %}selected{% endif %}>{{ m }}</option>
+                  <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
                 {% endfor %}
               </select>
-              <a href="{{ url_for('main_bp.config', model=selected_model) }}" class="btn btn-secondary">Configure</a>
+              <a id="config-link" href="#" class="btn btn-secondary" data-config-url="{{ url_for('main_bp.config') }}">Configure</a>
             </div>
-          </div-->
+          </div>
 
           <!-- System Prompt -->
           <div class="form-group">
@@ -55,5 +55,7 @@
       </div>
     </section>
   </main>
+
+      <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>
