@@ -10,6 +10,8 @@
   <!-- Sticky Header -->
   <header class="header">
     <div class="header-container">
+      <!-- Back Icon Button -->
+      <a href="{{ url_for('main_bp.index') }}" class="back-icon" aria-label="Back">&#8592;</a>
       <h1>Generated Answer</h1>
       <button id="toggle-slider" class="toggle-btn" aria-label="Toggle details panel">&lt;</button>
     </div>
@@ -23,9 +25,6 @@
       <!-- Scrollable answer card -->
       <div id="answer-content" class="answer-card"></div>
     </section>
-
-    <!-- Back Button: uses session-stored user_request -->
-    <a href="{{ url_for('main_bp.index') }}" class="btn btn-back">Back</a>
   </main>
 
   <!-- Off-canvas Slider Panel -->

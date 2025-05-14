@@ -182,7 +182,7 @@ body {
   position: fixed;
   top: 0;
   right: 0;
-  width: 320px;
+  width: 40%;
   height: 100vh;
   background: var(--card-bg);
   box-shadow: -4px 0 8px rgba(0,0,0,0.2);
@@ -318,4 +318,24 @@ form.form-full-height {
   width: 100%;
   height: 100%;
   display: block;
+}
+/* Back Icon in Header */
+ .header-container {
+   display: flex;             /* ensure flex flow */
+   align-items: center;
+   justify-content: space-between;
+   /* no position:relative */
+ }
+ .back-icon {
+   position: relative;
+   margin-right: 16px;
+   font-weight: bold;
+   font-size: 2rem;
+   color: var(--primary);
+   opacity: 0.8;
+   transition: opacity var(--transition), color var(--transition);
+   text-decoration: none;
+ }
+.back-icon:hover {
+  opacity: 1;
 }
