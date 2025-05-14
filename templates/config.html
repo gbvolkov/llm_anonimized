@@ -1,30 +1,46 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Configure {{ model }} Parameters</title>
-  </head>
-  <body>
-  {% block content %}
-    <div class="container mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">Configure {{ model }} parameters</h1>
-      <form method="post" action="{{ url_for('main_bp.config') }}" class="space-y-4">
-        <input type="hidden" name="model" value="{{ model }}">
-        {% set current_params = llm_params.get(model, {}) %}
-        {% for name, default in parameters.items() %}
-          <div class="flex flex-col">
-            <label for="{{ name }}" class="font-medium">{{ name }}</label>
-            <input type="text"
-                  name="{{ name }}"
-                  id="{{ name }}"
-                  value="{{ current_params.get(name, default) }}"
-                  class="border rounded p-2" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Configure {{ model }} Parameters</title>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <h1>LLM Proxy Interface</h1>
+    </div>
+  </header>
+  
+  <main class="main-content">
+    <div class="config-card">
+      <h2 class="config-title">Configure {{ model }} Parameters</h2>
+      <form method="post" action="{{ url_for('main_bp.config') }}" class="config-form">
+        <div class="config-grid">
+          <div class="form-group">
+            <label for="model_select">Model</label>
+            <select id="model_select" name="model" data-config-url="{{ url_for('main_bp.config') }}">
+              {% for m in available_models %}
+                <option value="{{ m }}" {% if m == model %}selected{% endif %}>{{ m }}</option>
+              {% endfor %}
+            </select>
           </div>
-        {% endfor %}
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-        <a href="{{ url_for('main_bp.index', model=model) }}" class="px-4 py-2 bg-gray-400 text-white rounded">Cancel</a>
+          {% set current_params = llm_params.get(model, {}) %}
+          {% for name, default in parameters.items() %}
+            <div class="form-group">
+              <label for="{{ name }}">{{ name }}</label>
+              <input type="text" id="{{ name }}" name="{{ name }}" value="{{ current_params.get(name, default) }}" />
+            </div>
+          {% endfor %}
+        </div>
+        <div class="button-group">
+          <button type="submit" class="button-primary">Save</button>
+          <a href="{{ url_for('main_bp.index', model=model) }}" class="btn">Cancel</a>
+        </div>
       </form>
     </div>
-  {% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+</body>
+</html>

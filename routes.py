@@ -82,7 +82,7 @@ def config():
     all_params = session.get('llm_params', {})
     return render_template(
         'config.html', model=model,
-        parameters=parameters, llm_params=all_params
+        parameters=parameters, llm_params=all_params, available_models=available_models
     )
 
 @main_bp.route('/result', methods=['POST'])

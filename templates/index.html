@@ -22,19 +22,14 @@
           {% for name, value in llm_params.items() %}
             <input type="hidden" name="{{ name }}" value="{{ value }}">
           {% endfor %}
-          <!-- Model Selection -->
-          <div class="form-group">
-            <label for="model">Choose Model</label>
-            <div class="flex items-center space-x-2">
-              <select name="model" id="model" class="form-control flex-1">
-                {% for m in available_models %}
-                  <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
-                {% endfor %}
-              </select>
-              <a id="config-link" href="#" class="btn btn-secondary" data-config-url="{{ url_for('main_bp.config') }}">Configure</a>
-            </div>
+          <!-- “Configure” button -->
+          <input type="hidden" name="model" value="{{ selected_model }}">
+          <div class="text-right mb-4">
+            <a href="{{ url_for('main_bp.config', model=selected_model) }}"
+              class="btn btn-secondary btn-sm">
+              Configure
+            </a>
           </div>
-
           <!-- System Prompt -->
           <div class="form-group">
             <label for="system_prompt">System Prompt</label>
