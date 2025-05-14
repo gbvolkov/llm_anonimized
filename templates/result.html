@@ -24,8 +24,8 @@
       <div id="answer-content" class="answer-card"></div>
     </section>
 
-    <!-- Back Button -->
-    <a href="{{ url_for('main_bp.index', user_request=user_request) }}" class="btn btn-back">Back</a>
+    <!-- Back Button: uses session-stored user_request -->
+    <a href="{{ url_for('main_bp.index') }}" class="btn btn-back">Back</a>
   </main>
 
   <!-- Off-canvas Slider Panel -->
