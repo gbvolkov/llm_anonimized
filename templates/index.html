@@ -18,18 +18,20 @@
   <main class="main-content">
     <section class="form-section">
       <div class="card">
+        <!-- small config icon in corner -->
+        <a href="{{ url_for('main_bp.config', model=selected_model) }}"
+          class="config-icon"
+          title="Configure model parameters">
+          <img src="{{ url_for('static', filename='icons/icons8-edit-64.svg') }}" alt="⚙️">
+        </a>        
         <form id="mainForm" method="post" action="{{ url_for('main_bp.result') }}" class="form-full-height">
           {% for name, value in llm_params.items() %}
             <input type="hidden" name="{{ name }}" value="{{ value }}">
           {% endfor %}
           <!-- “Configure” button -->
           <input type="hidden" name="model" value="{{ selected_model }}">
-          <div class="text-right mb-4">
-            <a href="{{ url_for('main_bp.config', model=selected_model) }}"
-              class="btn btn-secondary btn-sm">
-              Configure
-            </a>
-          </div>
+
+
           <!-- System Prompt -->
           <div class="form-group">
             <label for="system_prompt">System Prompt</label>
