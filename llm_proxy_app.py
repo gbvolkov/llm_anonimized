@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_session import Session
 import config
 #import os
 #os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
@@ -9,13 +10,18 @@ from palimpsest.logger_factory import setup_logging
 
 def create_app():
     app = Flask(__name__)
-    #app.config.from_object(Config)
+    # Load settings from config.py
     app.secret_key = config.SECRET_APP_KEY
-    # Register Blueprints
+    app.config.from_object('config')
+
+    # Enable server-side sessions
+    Session(app)
+
+    # Register blueprints
+    from routes import main_bp
     app.register_blueprint(main_bp)
 
     return app
-
 
 if __name__ == '__main__':
     import logging

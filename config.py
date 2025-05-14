@@ -29,3 +29,11 @@ GEMINI_API_KEY=os.environ.get('GEMINI_API_KEY')
 
 CRYPRO_KEY = os.environ.get('CRYPRO_KEY')
 SECRET_APP_KEY = os.environ.get('SECRET_APP_KEY')
+
+# Flask-Session: store session data in server files instead of cookies
+SESSION_TYPE = 'filesystem'
+# Directory to store session files; ensure this exists or adjust path
+SESSION_FILE_DIR = os.path.join("./data/sessions/", 'flask_session')
+SESSION_PERMANENT = False
+SESSION_USE_SIGNER = True  # add HMAC to session cookie
+# SECRET_KEY should be set elsewhere (environment or hardcoded)
