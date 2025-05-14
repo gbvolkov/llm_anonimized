@@ -2,23 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LLM Proxy Interface</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  
 </head>
 <body>
-  <h1>LLM Proxy Interface</h1>
-  <div class="container">
-    <form id="mainForm" method="post" action="{{ url_for('main_bp.result') }}">
-      <label>System Prompt:<br>
-        <textarea class="main-container" name="system_prompt" id="system_prompt" rows="4">{{ system_prompt }}</textarea>
-      </label><br>
-      <label>Your Request:<br>
-        <textarea class="main-container" name="user_request" id="user_request" rows="4">{{ user_request }}</textarea>
-      </label><br>
-      <button type="submit" name="action" value="go" class="button-primary">GO</button>
-    </form>
-  </div>
-  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  <!-- Sticky Header -->
+  <header class="header">
+    <div class="header-container">
+      <h1>LLM Proxy Interface</h1>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <section class="form-section">
+      <div class="card">
+        <form id="mainForm" method="post" action="{{ url_for('main_bp.result') }}" class="form-full-height">
+          {% for name, value in llm_params.items() %}
+            <input type="hidden" name="{{ name }}" value="{{ value }}">
+          {% endfor %}
+          <!-- Model Selection -->
+          <!--div class="form-group">
+            <label for="model">Choose Model</label>
+            <div class="flex items-center space-x-2">
+              <select name="model" id="model" class="form-control flex-1">
+                {% for m in available_models %}
+                  <option value="{{ m }}" {% if m==selected_model %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+              </select>
+              <a href="{{ url_for('main_bp.config', model=selected_model) }}" class="btn btn-secondary">Configure</a>
+            </div>
+          </div-->
+
+          <!-- System Prompt -->
+          <div class="form-group">
+            <label for="system_prompt">System Prompt</label>
+            <textarea name="system_prompt" id="system_prompt" rows="4" class="textarea">{{ system_prompt }}</textarea>
+          </div>
+
+          <!-- User Request (flex grow) -->
+          <div class="form-group grow">
+            <label for="user_request">Your Request</label>
+            <textarea name="user_request" id="user_request" class="textarea">{{ user_request }}</textarea>
+          </div>
+
+          <!-- Submit Button sticks to bottom -->
+          <div class="form-group">
+            <button type="submit" name="action" value="go" class="button-primary btn-full-width">GO</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

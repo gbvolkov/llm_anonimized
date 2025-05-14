@@ -1,223 +1,193 @@
-/* =========================
-   Base Reset & Typography
-   ========================= */
+:root {
+  --primary: #ec6707;
+  --primary-light: #fa9146;
+  --bg: #f7f7f7;
+  --text: #333;
+  --card-bg: #fff;
+  --radius: 8px;
+  --transition: 0.3s ease;
+  --header-height: 64px; /* adjust if header changes */
+  --page-padding: 16px;
+}
+
+/* Global Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-@font-face {
-  font-family: 'YS Text';
-  src: url(//yastatic.net/s3/home/fonts/ys/1/text-light.woff2) format('woff2'),
-       url(//yastatic.net/s3/home/fonts/ys/1/text-light.woff) format('woff');
-  font-weight: 300;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'YS Text';
-  src: url(//yastatic.net/s3/home/fonts/ys/1/text-regular.woff2) format('woff2'),
-       url(//yastatic.net/s3/home/fonts/ys/1/text-regular.woff) format('woff');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'YS Text';
-  src: url(//yastatic.net/s3/home/fonts/ys/1/text-medium.woff2) format('woff2'),
-       url(//yastatic.net/s3/home/fonts/ys/1/text-medium.woff) format('woff');
-  font-weight: 500;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'YS Text';
-  src: url(//yastatic.net/s3/home/fonts/ys/1/text-bold.woff2) format('woff2'),
-       url(//yastatic.net/s3/home/fonts/ys/1/text-bold.woff) format('woff');
-  font-weight: 700;
-  font-style: normal;
-}
-
-/* Full-page flex layout */
-html, body {
-  height: 100%;
-}
 body {
-  display: flex;
-  flex-direction: column;
   font-family: 'YS Text', 'Open Sans', sans-serif;
-  background-color: #ffffff;
-  color: #333;
-  line-height: 1.6;
-}
-
-/* Container stretches to fill remaining space */
-.container {
-  flex: 1;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   flex-direction: column;
-  min-height: 0; /* allow flex children to shrink */
-  width: 100%;
-  margin: 0;
-  padding: 20px;
-  box-sizing: border-box;
+  min-height: 100vh;
 }
 
-h1, h2, h3 {
-  color: #ec6707;
-  font-weight: 700;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-/* Main form as vertical flex */
-form#mainForm {
-  background-color: #fff;
-  padding: 30px;
-  margin: 20px 0;
-  width: 100%;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0; /* allow children to shrink */
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-/* Style system prompt textarea */
-#system_prompt {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 0;
-  font-size: 15px;
-  resize: vertical;
-  max-height: 150px;
-}
-
-/* Wrap the second label (Your Request) to flexibly grow */
-form#mainForm > label + br + label {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  margin-bottom: 0; /* remove bottom margin for flex layout */
-}
-
-/* User request textarea fills available space */
-#user_request {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 0;
-  font-size: 15px;
-  resize: vertical;
-  overflow: auto;
-  margin: 0; /* override default bottom margin */
-}
-
-/* Button sticks to bottom */
-button,
-input[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  margin: 0;
-  margin-top: auto;
-  border: none;
-  border-radius: 0;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button-primary {
-  background-color: #ec6707;
-  color: #ffffff;
-}
-.button-primary:hover {
-  background-color: #fa9146;
-}
-.button-secondary {
-  background-color: #ffffff;
-  color: #676767;
-  border: 1px solid #ccc;
-}
-.button-secondary:hover {
-  background-color: #f5f5f5;
-}
-
-/* Icon Buttons */
-.download-btn,
-.reload-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin: 5px;
+/* Utility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   padding: 0;
-}
-.download-btn {
-  width: 60px;
-  height: 60px;
-}
-.reload-btn {
-  width: 40px;
-  height: 40px;
-}
-.download-btn img,
-.reload-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: brightness(0) saturate(100%) invert(32%) sepia(74%) saturate(3600%) hue-rotate(355deg) brightness(102%) contrast(104%);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
-/* make the answer area fill & scroll */
-#answer-content {
+/* Header */
+.header {
+  background: var(--card-bg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-container h1 {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  width: calc(100% - 32px);
+  height: calc(100vh - var(--header-height) - 32px);
+  margin: 16px auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+}
+.answer-section {
+  flex: 1;
+  display: flex;
+}
+.answer-card {
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* expand to fill available height */
+  flex: 1;
+  overflow-y: auto;
+  /* allow full width */
+  width: 100%;
+  max-width: none;
+}
+
+/* Card wrapper for forms */
+.card {
+  flex: 1;
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* stretch to fill available width */
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  /* allow vertical growth if nested flex container */
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.form-group.grow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  font-family: inherit;
+  resize: vertical;
+  transition: border var(--transition);
+  /* allow expansion in flex container */
   flex: 1;
   min-height: 0;
-  overflow: auto;
-  padding-right: 10px;
-
-  /* ← new: space before the button */
-  padding-bottom: 20px;
+}
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
-/* style & pin the back link */
-a.btn {
-  display: block;
+/* Custom Select */
+.custom-select {
+  position: relative;
+}
+.custom-select select {
+  appearance: none;
   width: 100%;
   padding: 12px;
-  margin-top: auto;
-  text-align: center;
-  text-decoration: none;
-  font-size: 15px;
-  border-radius: 0;
-  background-color: #ec6707;
-  color: #fff;
-  transition: background-color 0.3s ease;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  transition: border var(--transition);
 }
-a.btn:hover {
-  background-color: #fa9146;
+.custom-select select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 0.9rem;
+  color: var(--text);
 }
 
-/* ——————————————————
-   Off-canvas slider
-   —————————————————— */
+/* Back Button and Primary Button */
+.btn,
+.button-primary {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition);
+  text-decoration: none;
+  display: inline-block;
+}
+.btn:hover,
+.button-primary:hover {
+  background: var(--primary-light);
+}
+
+/* Off-canvas Slider */
 .detail-slider {
   position: fixed;
   top: 0;
   right: 0;
-  width: 360px;
+  width: 320px;
   height: 100vh;
-  background: #fff;
+  background: var(--card-bg);
   box-shadow: -4px 0 8px rgba(0,0,0,0.2);
   transform: translateX(100%);
-  transition: transform 0.25s cubic-bezier(.25,.8,.25,1);
+  transition: transform var(--transition);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -225,49 +195,24 @@ a.btn:hover {
 .detail-slider.open {
   transform: translateX(0);
 }
-
-/* ——————————————————
-   Floating pill handle
-   —————————————————— */
-.detail-slider .toggle-btn {
-  position: absolute;
-  top: 50%;
-  left: -32px;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 80px;
-  background: #333;
+.toggle-btn {
+  background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 8px 0 0 8px;
+  padding: 8px;
+  border-radius: var(--radius) 0 0 var(--radius);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1001;
-  transition: background 0.2s;
+  transition: background var(--transition);
 }
-.detail-slider .toggle-btn:hover {
-  background: #444;
+.toggle-btn:hover {
+  background: var(--primary-light);
 }
-/* use ::after to flip arrow automatically */
-.detail-slider .toggle-btn::after {
-  content: '«';
-  font-size: 1.25rem;
-}
-.detail-slider.open .toggle-btn::after {
-  content: '»';
-}
-
-/* ——————————————————
-   Header, tabs, panes (unchanged)
-   —————————————————— */
 .slider-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px;
   border-bottom: 1px solid #ddd;
-  padding: 0.5rem;
 }
 .tabs {
   display: flex;
@@ -275,24 +220,24 @@ a.btn:hover {
 .tab-btn {
   background: none;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 8px 12px;
   cursor: pointer;
+  font-weight: 500;
 }
 .tab-btn.active {
-  border-bottom: 2px solid #333;
-  font-weight: bold;
+  border-bottom: 2px solid var(--primary);
+  color: var(--primary);
 }
 .close-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  line-height: 1;
+  font-size: 1.25rem;
   cursor: pointer;
 }
 .slider-body {
-  padding: 1rem;
-  overflow-y: auto;
   flex: 1;
+  overflow-y: auto;
+  padding: 16px;
 }
 .pane {
   display: none;
@@ -301,4 +246,50 @@ a.btn:hover {
 }
 .pane.active {
   display: block;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .header-container,
+  .main-content,
+  .card {
+    padding: 12px;
+    width: calc(100% - 24px);
+    margin: 12px auto;
+  }
+  .detail-slider {
+    width: 100%;
+  }
+}
+
+.form-section {
+  flex: 1;
+  display: flex;
+}
+/* Let form stretch */
+form.form-full-height {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* button sticks at bottom with auto margin */
+.btn-full-width {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* =========================
+   Additions to style.css
+   ========================= */
+
+/* Layout: limit card height to viewport */
+.main-content.result-flex {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height));
+  padding: var(--page-padding);
+}
+.btn-back {
+  margin-top: var(--page-padding);
+  align-self: flex-start;
 }

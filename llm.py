@@ -1,4 +1,4 @@
-from typing import Tuple, Any
+from typing import Tuple, Any, Dict
 from functools import lru_cache
 
 import config
@@ -38,7 +38,7 @@ def deanonymize(text: str, language = "en") -> str:
     return resulting_text
 
 
-def generate_answer(system_prompt: str, user_request: str) -> Tuple[str, str]:
+def generate_answer(system_prompt: str, user_request: str, llm_provider: str = "OpenAI", llm_parameters: Dict[str, Any] = {}) -> Tuple[str, str]:
     """
     Dummy LLM call. Replace with real API integration.
     Returns (llm_response, deanonymized_response).
@@ -50,14 +50,45 @@ def generate_answer(system_prompt: str, user_request: str) -> Tuple[str, str]:
         ]
     )
     processor.reset_context()
-    anonimized_request = anonymize(user_request, language="en")
+    anonymized_request = anonymize(user_request, language="en")
 
     chain = prompt | llm
     #chain = {"user_request": lambda txt: anonymize(txt, language="en")} | prompt | llm | (lambda ai_message: deanonymize(ai_message.content))
-    response = chain.invoke(anonimized_request)
+    response = chain.invoke(anonymized_request)
     llm_answer = response.content
     deanonymized_answer = deanonymize(llm_answer)
-    return deanonymized_answer, anonimized_request, llm_answer
+    return deanonymized_answer, anonymized_request, llm_answer
+
+def get_llm_parameters(provider: str) -> Dict[str, str]:
+    """
+    Return default parameter names → values for each supported LLM provider.
+    Update this dict when provider parameter sets change.
+    """
+    defaults = {
+        "OpenAI": {
+            "api_key": "",
+            "model_spec": "gpt-4",
+            "temperature": "0.7",
+            "max_tokens": "1024"
+        },
+        "Mistral": {
+            "api_key": "",
+            "model_spec": "mist-1",
+            "temperature": "0.7"
+        },
+        "Yandex": {
+            "api_key": "",
+            "model_spec": "yam-1",
+            "temperature": "0.7",
+            "folder_id": ""
+        },
+        "SberGIGA": {
+            "api_key": "",
+            "model_spec": "sbg-1",
+            "temperature": "0.7"
+        },
+    }
+    return defaults.get(provider, {}) if provider else defaults
 
 if __name__ == "__main__":
     from palimpsest.logger_factory import setup_logging

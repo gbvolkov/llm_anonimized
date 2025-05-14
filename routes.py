@@ -1,39 +1,107 @@
-from flask import Blueprint, render_template, request, redirect, url_for, make_response
-from llm import generate_answer
+from flask import Blueprint, render_template, request, redirect, url_for, make_response, session, current_app
+import json
+
+from llm import generate_answer, get_llm_parameters
+
 
 main_bp = Blueprint('main_bp', __name__)
+
+defaults_map = get_llm_parameters('')
+available_models = list(defaults_map.keys())
+
+@main_bp.before_app_request
+def load_llm_params():
+    if 'llm_params' not in session:
+        params_cookie = request.cookies.get('llm_params')
+        if params_cookie:
+            try:
+                session['llm_params'] = json.loads(params_cookie)
+            except json.JSONDecodeError:
+                session['llm_params'] = {}
+        else:
+            session['llm_params'] = {}
+
 
 @main_bp.route('/', methods=['GET'])
 def index():
     # Read system_prompt from cookie or use default
-    default_prompt = request.cookies.get('system_prompt', 'Enter your system prompt here...')
+    default_prompt = request.cookies.get('system_prompt', 'Ты полезный помощник.')
     # Read user_request from query string on return or default greeting
     default_request = request.args.get('user_request', 'Привет!')
+    # restore last-used model or default to OpenAI
+    selected_model = request.args.get('model') or request.cookies.get('model', 'OpenAI')
+
+    # Load saved LLM parameters from cookie, if any
+    llm_params = session.get('llm_params', {})
+
     return render_template('index.html', 
                            system_prompt=default_prompt, 
-                           user_request=default_request)
+                           user_request=default_request,
+                           available_models=available_models,
+                           selected_model=selected_model,
+                           llm_params=llm_params)
+
+@main_bp.route('/config', methods=['GET', 'POST'])
+def config():
+    # Determine model to configure, falling back to cookie
+    #available_models = current_app.config['AVAILABLE_MODELS']
+    model = request.values.get('model') or request.cookies.get('model', available_models[0])
+
+    if request.method == 'POST':
+        defaults = get_llm_parameters(model)
+        params = {}
+        for name, default in defaults.items():
+            raw = request.form.get(name, default)
+            try:
+                if isinstance(default, bool):
+                    value = raw.lower() in ['true', '1', 'yes']
+                elif isinstance(default, int):
+                    value = int(raw)
+                elif isinstance(default, float):
+                    value = float(raw)
+                else:
+                    value = raw
+            except Exception:
+                value = raw
+            params[name] = value
+
+        # Update session and persist cookie once
+        session['llm_params'] = params
+        resp = make_response(redirect(url_for('main_bp.index')))
+        resp.set_cookie('model', model)
+        resp.set_cookie('llm_params', json.dumps(params), max_age=30*24*3600)
+        return resp
+
+    # GET: render form with defaults and current session params
+    parameters = get_llm_parameters(model)
+    current = session.get('llm_params', {})
+    return render_template(
+        'config.html', model=model,
+        parameters=parameters, llm_params=current
+    )
 
 @main_bp.route('/result', methods=['POST'])
 def result():
     # Generate answer from submitted form
     system_prompt = request.form.get('system_prompt', '')
     user_request = request.form.get('user_request', '')
-    answer, anonymized_request, llm_answer = generate_answer(system_prompt, user_request)
+    model = request.form.get('model', 'OpenAI')
+    
+    llm_params = session.get('llm_params', {})
 
-    # Render result.html with raw markdown and original request
-    # Optionally set system_prompt cookie for next time
-    #response = make_response(
-    #    render_template('result.html', 
-    #                    llm_response=answer, 
-    #                    user_request=user_request)
-    #)
+    answer, anonymized_request, llm_answer = generate_answer(system_prompt=system_prompt, 
+                                                             user_request=user_request, 
+                                                             llm_provider=model,
+                                                             llm_parameters=llm_params)
+
+
     response = make_response(render_template(
         'result.html',
         llm_response=answer,
         anonymized_request=anonymized_request,
         llm_answer=llm_answer,
-        user_request=user_request,
+        user_request=user_request
     ))
-    # Uncomment to persist system_prompt:
-    # response.set_cookie('system_prompt', system_prompt)
+    response.set_cookie('system_prompt', system_prompt)
+    response.set_cookie('model', model)
     return response
