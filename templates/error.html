@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Error</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Sticky Header with Back and Config Icons -->
+  <header class="header">
+    <div class="header-container">
+      <!-- Back Icon -->
+      <a href="{{ url_for('main_bp.index') }}" class="back-icon" aria-label="Back">&larr;</a>
+      <h1>Error</h1>
+      <!-- Config Icon -->
+      <a href="{{ url_for('main_bp.config', model=selected_model) }}"
+         class="config-icon"
+         title="Configure model parameters">
+        <img src="{{ url_for('static', filename='icons/icons8-edit-64.svg') }}" alt="⚙️">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <section class="form-section">
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-4">An error occurred:</h2>
+        <pre class="overflow-auto whitespace-pre-wrap text-red-600">{{ error }}</pre>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

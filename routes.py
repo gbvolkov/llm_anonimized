@@ -86,12 +86,20 @@ def result():
 
     # Load params & generate
     llm_params = session['llm_params'].get(model, {})
-    answer, anonymized_request, llm_answer = generate_answer(
-        system_prompt=session['system_prompt'],
-        user_request=session['user_request'],
-        llm_provider=model,
-        llm_parameters=llm_params
-    )
+    try:
+        answer, anonymized_request, llm_answer = generate_answer(
+            system_prompt=session['system_prompt'],
+            user_request=session['user_request'],
+            llm_provider=model,
+            llm_parameters=llm_params
+        )
+    except Exception as e:
+        error_msg = str(e)
+        return render_template(
+            'error.html',
+            error=error_msg,
+            selected_model=model
+        ), 500
 
     # Optionally store answer
     session['llm_answer'] = llm_answer

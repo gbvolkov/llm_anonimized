@@ -6,6 +6,7 @@ langchain_openai
 langchain_community
 grpcio
 yandexcloud
+langchain_gigachat
 
 Flask>=2.0.0
 flask_session

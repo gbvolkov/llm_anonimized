@@ -1,11 +1,17 @@
 from typing import Tuple, Any, Dict
+import json
 from functools import lru_cache
-
+import os
 import config
+
+
+os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 from langchain_mistralai import ChatMistralAI
 from langchain_community.chat_models import ChatYandexGPT
 from langchain_openai import ChatOpenAI
+from langchain_gigachat import GigaChat
 from langchain_core.prompts import ChatPromptTemplate
 
 from palimpsest import Palimpsest
@@ -25,7 +31,8 @@ llm = ChatYandexGPT(
     temperature=0.4
     )
 """
-llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0.4, frequency_penalty=0.3)
+#llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0.4, frequency_penalty=0.3)
+
 
 processor = Palimpsest(verbose=True)
 
@@ -38,7 +45,73 @@ def deanonymize(text: str, language = "en") -> str:
     return resulting_text
 
 
-def generate_answer(system_prompt: str, user_request: str, llm_provider: str = "OpenAI", llm_parameters: Dict[str, Any] = {}) -> Tuple[str, str]:
+@lru_cache(maxsize=32)
+def _make_llm_cache(provider: str, params_json: str):
+    """Internal helper: instantiate and cache an LLM client based on JSON-encoded parameters."""
+    params = json.loads(params_json)
+    defaults = get_llm_parameters(provider)
+    # Merge defaults with overrides
+    merged = {**defaults, **params}
+
+    # Instantiate provider-specific LLM
+    if provider == 'OpenAI':
+        temperature = float(merged['temperature'])
+        frequency_penalty = float(merged['frequency_penalty'])
+
+        return ChatOpenAI(
+            api_key=merged.get('api_key'),
+            model=merged['model_spec'],
+            temperature=temperature,
+            frequency_penalty=frequency_penalty
+        )
+    elif provider == 'Mistral':
+        temperature = float(merged['temperature'])
+        frequency_penalty = float(merged['frequency_penalty'])
+
+        return ChatMistralAI(
+            api_key=merged.get('api_key'),
+            model=merged['model_spec'],
+            temperature=merged['temperature'],
+            frequency_penalty=frequency_penalty
+        )
+    elif provider == 'Yandex':
+        temperature = float(merged['temperature'])
+        model_uri = f"gpt://{merged.get('folder_id')}/{merged.get('model_spec')}/rc"
+        
+        return ChatYandexGPT(
+            api_key=merged.get('api_key'),
+            folder_id=merged.get('folder_id'),
+            model_uri=model_uri,
+            temperature=temperature
+        )
+    elif provider == 'SberGIGA':
+        # Uses OpenAI-compatible interface
+        temperature = float(merged['temperature'])
+        repetition_penalty = float(merged['repetition_penalty'])
+        timeout = float(merged['timeout'])
+        max_tockens = int(merged['max_tockens'])
+        return GigaChat(
+            credentials=merged['credentials'], 
+            model=merged['model_spec'],
+            verify_ssl_certs=False,
+            temperature=temperature,
+            scope=merged['scope'],
+            max_tokens=max_tockens,
+            timeout=timeout,
+            repetition_penalty=repetition_penalty
+        )
+    else:
+        raise ValueError(f"Unknown LLM provider: {provider}")
+
+def make_llm(provider: str, llm_parameters: Dict[str, Any]):
+    """
+    Public factory: returns a cached LLM client instance for the given provider and parameters.
+    """
+    # JSON-serialize parameters with sorted keys for stable caching
+    params_json = json.dumps(llm_parameters or {}, sort_keys=True)
+    return _make_llm_cache(provider, params_json)
+
+def generate_answer(system_prompt: str, user_request: str, llm_provider: str = "OpenAI", llm_parameters: Dict[str, Any] = {}) -> Tuple[str, str, str]:
     """
     Dummy LLM call. Replace with real API integration.
     Returns (llm_response, deanonymized_response).
@@ -51,7 +124,7 @@ def generate_answer(system_prompt: str, user_request: str, llm_provider: str = "
     )
     processor.reset_context()
     anonymized_request = anonymize(user_request, language="en")
-
+    llm = make_llm(llm_provider, llm_parameters)
     chain = prompt | llm
     #chain = {"user_request": lambda txt: anonymize(txt, language="en")} | prompt | llm | (lambda ai_message: deanonymize(ai_message.content))
     response = chain.invoke(anonymized_request)
@@ -67,25 +140,30 @@ def get_llm_parameters(provider: str) -> Dict[str, str]:
     defaults = {
         "OpenAI": {
             "api_key": "",
-            "model_spec": "gpt-4",
-            "temperature": "0.7",
-            "max_tokens": "1024"
+            "model_spec": "gpt-4.1-nano",
+            "temperature": "0.4",
+            "frequency_penalty": "0.3"
         },
         "Mistral": {
             "api_key": "",
-            "model_spec": "mist-1",
-            "temperature": "0.7"
+            "model_spec": "mistral-large-latest",
+            "temperature": "0.4",
+            "frequency_penalty": "0.3"
         },
         "Yandex": {
             "api_key": "",
-            "model_spec": "yam-1",
-            "temperature": "0.7",
+            "model_spec": "yandexgpt-32k",
+            "temperature": "0.4",
             "folder_id": ""
         },
         "SberGIGA": {
-            "api_key": "",
-            "model_spec": "sbg-1",
-            "temperature": "0.7"
+            "credentials": "",
+            "scope": "",
+            "model_spec": "GigaChat-Pro",
+            "temperature": "0.4",
+            "repetition_penalty": "0.3",
+            "max_tockens": "4096",
+            "timeout": "300"
         },
     }
     return defaults.get(provider, {}) if provider else defaults
