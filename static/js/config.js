@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   const select = document.getElementById('model_select');
-  if (!select) return;
+  if (!select) {
+    return;
+  }
 
   select.addEventListener('change', function() {
     const baseUrl = select.dataset.configUrl;
