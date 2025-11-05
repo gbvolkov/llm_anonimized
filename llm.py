@@ -9,9 +9,9 @@ os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 from langchain_mistralai import ChatMistralAI
-from langchain_community.chat_models import ChatYandexGPT
+#from langchain_community.chat_models import ChatYandexGPT
 from langchain_openai import ChatOpenAI
-from langchain_gigachat import GigaChat
+#from langchain_gigachat import GigaChat
 from langchain_core.prompts import ChatPromptTemplate
 
 from palimpsest import Palimpsest
@@ -34,7 +34,22 @@ llm = ChatYandexGPT(
 #llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0.4, frequency_penalty=0.3)
 
 
-processor = Palimpsest(verbose=True)
+anon_entities = [
+    "RU_PERSON"
+    ,"RU_ADDRESS"
+    ,"PERSON"
+    ,"CREDIT_CARD"
+    ,"PHONE_NUMBER"
+    ,"IP_ADDRESS"
+    ,"URL"
+    ,"RU_PASSPORT"
+    ,"SNILS"
+    ,"INN"
+    ,"RU_BANK_ACC"
+    ,"TICKET_NUMBER"
+]
+
+processor = Palimpsest(verbose=True, run_entities=anon_entities, locale="en-US")
 
 def anonymize(text: str, language = "en") -> str:
     resulting_text = processor.anonimize(text)
@@ -74,32 +89,32 @@ def _make_llm_cache(provider: str, params_json: str):
             temperature=merged['temperature'],
             frequency_penalty=frequency_penalty
         )
-    elif provider == 'Yandex':
-        temperature = float(merged['temperature'])
-        model_uri = f"gpt://{merged.get('folder_id')}/{merged.get('model_spec')}/rc"
-        
-        return ChatYandexGPT(
-            api_key=merged.get('api_key'),
-            folder_id=merged.get('folder_id'),
-            model_uri=model_uri,
-            temperature=temperature
-        )
-    elif provider == 'SberGIGA':
-        # Uses OpenAI-compatible interface
-        temperature = float(merged['temperature'])
-        repetition_penalty = float(merged['repetition_penalty'])
-        timeout = float(merged['timeout'])
-        max_tockens = int(merged['max_tockens'])
-        return GigaChat(
-            credentials=merged['credentials'], 
-            model=merged['model_spec'],
-            verify_ssl_certs=False,
-            temperature=temperature,
-            scope=merged['scope'],
-            max_tokens=max_tockens,
-            timeout=timeout,
-            repetition_penalty=repetition_penalty
-        )
+    #elif provider == 'Yandex':
+    #    temperature = float(merged['temperature'])
+    #    model_uri = f"gpt://{merged.get('folder_id')}/{merged.get('model_spec')}/rc"
+    #    
+    #    return ChatYandexGPT(
+    #        api_key=merged.get('api_key'),
+    #        folder_id=merged.get('folder_id'),
+    #        model_uri=model_uri,
+    #        temperature=temperature
+    #    )
+    #elif provider == 'SberGIGA':
+    #    # Uses OpenAI-compatible interface
+    #    temperature = float(merged['temperature'])
+    #    repetition_penalty = float(merged['repetition_penalty'])
+    #    timeout = float(merged['timeout'])
+    #    max_tockens = int(merged['max_tockens'])
+    #    return GigaChat(
+    #        credentials=merged['credentials'], 
+    #        model=merged['model_spec'],
+    #        verify_ssl_certs=False,
+    #        temperature=temperature,
+    #        scope=merged['scope'],
+    #        max_tokens=max_tockens,
+    #        timeout=timeout,
+    #        repetition_penalty=repetition_penalty
+    #    )
     else:
         raise ValueError(f"Unknown LLM provider: {provider}")
 
@@ -170,15 +185,17 @@ def get_llm_parameters(provider: str) -> Dict[str, str]:
 
 if __name__ == "__main__":
     from palimpsest.logger_factory import setup_logging
-
+    import config
 
     setup_logging("anonimizer_web_test", other_console_level=logging.DEBUG, project_console_level=logging.DEBUG)
 
-    text = """Клиент Степан Степанов (4519227557) по поручению Ивана Иванова обратился в "Интерлизинг" с предложением купить трактор. 
-    Для оплаты используется его карта 4095260993934932. 
-    Позвоните ему 9867777777 или 9857777237.
-    Или можно по адресу г. Санкт-Петербург, Сенная Площадь, д1/2кв17
-    Посмотреть его данные можно https://client.ileasing.ru/name=stapanov:3000 или зайти на 182.34.35.12/
-    """    
-    system_prompt = """Преобразуй текст в записку для записи в CRM. Текст должен быть хорошо структурирован и понятен с первого взгляда"""
-    print(generate_answer(system_prompt, text))
+    text = """Client John Doe (4519227557), on behalf of William Scheffler (4519227557), contacted “Interleasing” with a proposal to buy a tractor.
+Payment will be made using his card 4095260993934932.
+Call him at 986-777-7777 or 985-777-7237.
+Or visit him at London, City, str Queen Elisabeth, building 1/2, apt. 17.
+You can view his data at https://client.ileasing.com/name=doe:3000
+ or go to 182.34.35.12/
+    """
+
+    system_prompt = """Convert the text into a note for entry into the CRM. The note should be well-structured and immediately clear at a glance."""
+    print(generate_answer(system_prompt, text, llm_parameters={"api_key": config.OPENAI_API_KEY}))

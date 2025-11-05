@@ -4,9 +4,9 @@ langchain
 langchain_mistralai
 langchain_openai
 langchain_community
-grpcio
-yandexcloud
-langchain_gigachat
+#grpcio
+#yandexcloud
+#langchain_gigachat
 
 Flask>=2.0.0
 flask_session
