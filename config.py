@@ -35,5 +35,5 @@ SESSION_TYPE = 'filesystem'
 # Directory to store session files; ensure this exists or adjust path
 SESSION_FILE_DIR = os.path.join("./data/sessions/", 'flask_session')
 SESSION_PERMANENT = False
-SESSION_USE_SIGNER = True  # add HMAC to session cookie
+SESSION_USE_SIGNER = False  # add HMAC to session cookie
 # SECRET_KEY should be set elsewhere (environment or hardcoded)
